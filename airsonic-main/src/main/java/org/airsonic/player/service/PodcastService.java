@@ -19,8 +19,6 @@
  */
 package org.airsonic.player.service;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.airsonic.player.dao.PodcastDao;
 import org.airsonic.player.domain.MediaFile;
@@ -51,7 +49,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -60,6 +57,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import static org.airsonic.player.util.XMLUtil.createSAXBuilder;
 
@@ -94,13 +92,10 @@ public class PodcastService {
     private MetaDataParserFactory metaDataParserFactory;
 
     public PodcastService() {
-        ThreadFactory threadFactory = new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = Executors.defaultThreadFactory().newThread(r);
-                t.setDaemon(true);
-                return t;
-            }
+        ThreadFactory threadFactory = r -> {
+            Thread t = Executors.defaultThreadFactory().newThread(r);
+            t.setDaemon(true);
+            return t;
         };
         refreshExecutor = Executors.newFixedThreadPool(5, threadFactory);
         downloadExecutor = Executors.newFixedThreadPool(3, threadFactory);
@@ -221,17 +216,14 @@ public class PodcastService {
     public List<PodcastEpisode> getNewestEpisodes(int count) {
         List<PodcastEpisode> episodes = addMediaFileIdToEpisodes(podcastDao.getNewestEpisodes(count));
 
-        return Lists.newArrayList(Iterables.filter(episodes, new Predicate<PodcastEpisode>() {
-            @Override
-            public boolean apply(PodcastEpisode episode) {
-                Integer mediaFileId = episode.getMediaFileId();
-                if (mediaFileId == null) {
-                    return false;
-                }
-                MediaFile mediaFile = mediaFileService.getMediaFile(mediaFileId);
-                return mediaFile != null && mediaFile.isPresent();
+        return Lists.newArrayList(episodes.stream().filter(episode -> {
+            Integer mediaFileId = episode.getMediaFileId();
+            if (mediaFileId == null) {
+                return false;
             }
-        }));
+            MediaFile mediaFile = mediaFileService.getMediaFile(mediaFileId);
+            return mediaFile != null && mediaFile.isPresent();
+        }).collect(Collectors.toList()));
     }
 
     private List<PodcastEpisode> filterAllowed(List<PodcastEpisode> episodes) {
