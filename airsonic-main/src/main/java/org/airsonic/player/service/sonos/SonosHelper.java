@@ -19,8 +19,6 @@
 
 package org.airsonic.player.service.sonos;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.sonos.services._1.*;
 import org.airsonic.player.controller.CoverArtController;
@@ -33,8 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.airsonic.player.service.NetworkService.getBaseUrl;
 
@@ -622,12 +620,7 @@ public class SonosHelper {
     }
 
     private List<MediaFile> filterMusic(List<MediaFile> files) {
-        return Lists.newArrayList(Iterables.filter(files, new Predicate<MediaFile>() {
-            @Override
-            public boolean apply(MediaFile input) {
-                return input.getMediaType() == MediaFile.MediaType.MUSIC;
-            }
-        }));
+        return Lists.newArrayList(files.stream().filter(input -> input.getMediaType() == MediaFile.MediaType.MUSIC).collect(Collectors.toList()));
     }
 
     public void setPlaylistService(PlaylistService playlistService) {

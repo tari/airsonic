@@ -19,13 +19,12 @@
 
 package org.airsonic.player.service;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import de.umass.lastfm.*;
 import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
+import de.umass.lastfm.*;
 import org.airsonic.player.dao.ArtistDao;
 import org.airsonic.player.dao.MediaFileDao;
 import org.airsonic.player.domain.*;
@@ -36,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -342,12 +340,7 @@ public class LastFmService {
 
             Collection<Album> matches = Album.search(query.toString(), LAST_FM_KEY);
             return FluentIterable.from(matches)
-                                 .transform(new Function<Album, LastFmCoverArt>() {
-                                     @Override
-                                     public LastFmCoverArt apply(Album album) {
-                                         return convert(album);
-                                     }
-                                 })
+                                 .transform(album1 -> convert(album1))
                                  .filter(Predicates.notNull())
                                  .toList();
         } catch (Throwable x) {
