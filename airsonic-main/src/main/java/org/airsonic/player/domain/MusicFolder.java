@@ -19,14 +19,14 @@
  */
 package org.airsonic.player.domain;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Represents a top level directory in which music or other media is stored.
@@ -170,28 +170,18 @@ public class MusicFolder implements Serializable {
 
 
     public static List<Integer> toIdList(List<MusicFolder> from) {
-        return Lists.transform(from, toId());
+        return from.stream().map(toId()).collect(Collectors.toList());
     }
 
     public static List<String> toPathList(List<MusicFolder> from) {
-        return Lists.transform(from, toPath());
+        return from.stream().map(toPath()).collect(Collectors.toList());
     }
 
     public static Function<MusicFolder, Integer> toId() {
-        return new Function<MusicFolder, Integer>() {
-            @Override
-            public Integer apply(MusicFolder from) {
-                return from.getId();
-            }
-        };
+        return MusicFolder::getId;
     }
 
     public static Function<MusicFolder, String> toPath() {
-        return new Function<MusicFolder, String>() {
-            @Override
-            public String apply(MusicFolder from) {
-                return from.getPath().getPath();
-            }
-        };
+        return from -> from.getPath().getPath();
     }
 }
