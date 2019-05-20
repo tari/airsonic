@@ -19,13 +19,11 @@
  */
 package org.airsonic.player.ajax;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import org.airsonic.player.dao.MediaFileDao;
 import org.airsonic.player.dao.PlayQueueDao;
 import org.airsonic.player.domain.*;
-import org.airsonic.player.service.*;
 import org.airsonic.player.service.PlaylistService;
+import org.airsonic.player.service.*;
 import org.airsonic.player.util.StringUtil;
 import org.directwebremoting.WebContextFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +32,8 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides AJAX-enabled services for manipulating the play queue of a player.
@@ -334,12 +332,9 @@ public class PlayQueueService {
         HttpServletResponse response = WebContextFactory.get().getHttpServletResponse();
 
         List<PodcastEpisode> episodes = podcastService.getNewestEpisodes(10);
-        List<MediaFile> files = Lists.transform(episodes, new Function<PodcastEpisode, MediaFile>() {
-            @Override
-            public MediaFile apply(PodcastEpisode episode) {
-                return mediaFileService.getMediaFile(episode.getMediaFileId());
-            }
-        });
+        List<MediaFile> files = episodes.stream().map(
+                episode -> mediaFileService.getMediaFile(episode.getMediaFileId())).collect(Collectors.toList()
+        );
 
         String username = securityService.getCurrentUsername(request);
         boolean queueFollowingSongs = settingsService.getUserSettings(username).isQueueFollowingSongs();
