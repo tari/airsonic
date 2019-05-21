@@ -19,8 +19,6 @@
  */
 package org.airsonic.player.domain;
 
-import com.google.common.base.Objects;
-
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
@@ -160,12 +158,12 @@ public class MusicFolder implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        return Objects.equal(id, ((MusicFolder) o).id);
+        return id.equals(((MusicFolder) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return id.hashCode();
     }
 
 

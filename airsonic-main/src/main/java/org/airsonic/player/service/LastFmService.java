@@ -19,9 +19,6 @@
 
 package org.airsonic.player.service;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
 import de.umass.lastfm.*;
@@ -40,6 +37,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Provides services from the Last.fm REST API.
@@ -339,10 +337,7 @@ public class LastFmService {
             }
 
             Collection<Album> matches = Album.search(query.toString(), LAST_FM_KEY);
-            return FluentIterable.from(matches)
-                                 .transform(album1 -> convert(album1))
-                                 .filter(Predicates.notNull())
-                                 .toList();
+            return matches.stream().map(this::convert).filter(Objects::nonNull).collect(Collectors.toList());
         } catch (Throwable x) {
             LOG.warn("Failed to search for cover art for " + artist + " - " + album, x);
             return Collections.emptyList();
@@ -351,7 +346,9 @@ public class LastFmService {
 
     private LastFmCoverArt convert(Album album) {
         String imageUrl = null;
-        for (ImageSize imageSize : Lists.reverse(Arrays.asList(ImageSize.values()))) {
+        List<ImageSize> imageSizes = Arrays.asList(ImageSize.values());
+        Collections.reverse(imageSizes);
+        for (ImageSize imageSize : imageSizes) {
             imageUrl = StringUtils.trimToNull(album.getImageURL(imageSize));
             if (imageUrl != null) {
                 break;

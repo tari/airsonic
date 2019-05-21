@@ -19,7 +19,6 @@
 
 package org.airsonic.player.service.sonos;
 
-import com.google.common.collect.Lists;
 import com.sonos.services._1.*;
 import org.airsonic.player.controller.CoverArtController;
 import org.airsonic.player.dao.MediaFileDao;
@@ -620,7 +619,7 @@ public class SonosHelper {
     }
 
     private List<MediaFile> filterMusic(List<MediaFile> files) {
-        return Lists.newArrayList(files.stream().filter(input -> input.getMediaType() == MediaFile.MediaType.MUSIC).collect(Collectors.toList()));
+        return files.stream().filter(input -> input.getMediaType() == MediaFile.MediaType.MUSIC).collect(Collectors.toList());
     }
 
     public void setPlaylistService(PlaylistService playlistService) {

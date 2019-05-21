@@ -19,7 +19,6 @@
  */
 package org.airsonic.player.service;
 
-import com.google.common.collect.Lists;
 import org.airsonic.player.dao.PodcastDao;
 import org.airsonic.player.domain.MediaFile;
 import org.airsonic.player.domain.PodcastChannel;
@@ -216,7 +215,7 @@ public class PodcastService {
     public List<PodcastEpisode> getNewestEpisodes(int count) {
         List<PodcastEpisode> episodes = addMediaFileIdToEpisodes(podcastDao.getNewestEpisodes(count));
 
-        return Lists.newArrayList(episodes.stream().filter(episode -> {
+        List<PodcastEpisode> newEpisodes = (episodes.stream().filter(episode -> {
             Integer mediaFileId = episode.getMediaFileId();
             if (mediaFileId == null) {
                 return false;
@@ -224,6 +223,8 @@ public class PodcastService {
             MediaFile mediaFile = mediaFileService.getMediaFile(mediaFileId);
             return mediaFile != null && mediaFile.isPresent();
         }).collect(Collectors.toList()));
+
+        return new ArrayList<>(newEpisodes);
     }
 
     private List<PodcastEpisode> filterAllowed(List<PodcastEpisode> episodes) {
